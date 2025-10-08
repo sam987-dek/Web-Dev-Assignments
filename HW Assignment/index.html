@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>css units</title>
+    
+    <style>
+     .container{
+        background-color: green;
+         display: flex;
+         height: 500px;
+          flex-wrap: wrap;
+     }
+     .box{
+       background-color:red;
+        height: 150px;
+        width: 140px;
+        margin: 20px;
+        flex-wrap: wrap;
+       
+     }
+     .box1{
+        order: 5;
+        /* flex-shrink: 2; */
+      
+     }
+     .box2{
+        order: 3;
+        /* flex-grow: 2; */
+     }
+     .box3{
+        order: 17;
+        /* flex-grow: 4; */
+     }
+    
+     .box4{
+        order: 13;
+        /* flex-shrink: 2; */
+     }
+     @media(min-width:1095px){
+        .container{
+            background-color: coral;
+        }
+        .box{
+            background-color: black;
+        }
+     }
+
+    </style>
+</head>
+<body> <div class="container">
+    <div class="box box1">1</div>
+    <div class="box box2">2</div>
+    <div class="box box3">3</div>
+     <div class="box box3">4</div>
+      <div class="box box3">5</div>
+       <div class="box box3">6</div>
+        <div class="box box3">7</div>
+         <div class="box box3">8</div>
+   
+    
+     
+ </div>
+</body>
+</html>

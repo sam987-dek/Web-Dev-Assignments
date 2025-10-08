@@ -1,0 +1,720 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Last Light</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+        
+        /* Custom Styles for Dark Aesthetic */
+        body {
+            background-color: #111827; /* Dark background */
+            font-family: 'Inter', sans-serif;
+            color: #d1d5db;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            overflow: hidden;
+            user-select: none;
+        }
+        #game-area {
+            display: flex;
+            flex-direction: column;
+            width: 900px;
+            max-width: 95vw;
+            height: 650px;
+            max-height: 95vh;
+            border: 4px solid #4b5563;
+            border-radius: 12px;
+            box-shadow: 0 0 40px rgba(255, 193, 7, 0.2);
+            overflow: hidden;
+        }
+
+        #game-canvas {
+            background-color: #000; /* Pure black for the deep darkness */
+            display: block;
+            width: 100%;
+            height: 450px; /* Dedicated height for the canvas view */
+            cursor: pointer;
+        }
+
+        /* Utility classes for the UI panel */
+        .status-bar-container {
+            height: 12px;
+            background-color: #374151;
+            border-radius: 6px;
+            overflow: hidden;
+        }
+        
+        .status-bar-fill {
+            height: 100%;
+            transition: width 0.3s ease-out;
+        }
+        
+        .action-button {
+            transition: all 0.1s;
+            font-family: 'Press Start 2P', cursive;
+        }
+        .action-button:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 8px rgba(255, 255, 255, 0.5);
+        }
+        .action-button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        
+        .crafting-item {
+            border-radius: 6px;
+            transition: background-color 0.1s;
+        }
+
+        .crafting-item:hover:not(.disabled) {
+            background-color: #374151;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="game-area" class="bg-gray-800">
+        <!-- Canvas Viewport -->
+        <canvas id="game-canvas" width="900" height="450"></canvas>
+        
+        <!-- UI Control Panel -->
+        <div id="ui-panel" class="p-4 bg-gray-900 flex-grow text-sm flex space-x-4">
+            
+            <!-- Column 1: Status and Player Info -->
+            <div class="w-1/3 space-y-3">
+                <h3 class="text-lg font-bold text-yellow-400">Guardian Status</h3>
+                
+                <!-- Light Stability Meter -->
+                <div>
+                    <div class="flex justify-between font-mono text-xs mb-1">
+                        <span>Light Stability:</span>
+                        <span id="stability-value">100%</span>
+                    </div>
+                    <div class="status-bar-container">
+                        <div id="stability-bar" class="status-bar-fill bg-red-600" style="width: 100%;"></div>
+                    </div>
+                </div>
+
+                <!-- Carried Crystal -->
+                <div class="font-mono text-xs">
+                    Carrying: <span id="carried-crystal" class="text-red-300 font-bold">None</span>
+                </div>
+                
+                <!-- Inventory -->
+                <div class="font-mono text-xs">
+                    Stored T1: <span id="inventory-t1" class="text-green-400">0</span> |
+                    Stored T2: <span id="inventory-t2" class="text-blue-400">0</span>
+                </div>
+
+                <!-- Equipment -->
+                <div class="text-xs font-mono">
+                    <span class="font-bold text-yellow-500">Equipment:</span>
+                    <ul id="equipment-list" class="mt-1 space-y-1">
+                        <!-- Equipment dynamically inserted here -->
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Column 2: Action Panel (Center Only) -->
+            <div id="action-panel" class="w-1/3 space-y-3 hidden">
+                <h3 class="text-lg font-bold text-yellow-400">Light Source Actions</h3>
+                
+                <!-- Immolate Section -->
+                <div class="border border-gray-700 p-2 rounded-lg">
+                    <p class="text-base font-semibold mb-1">1. Immolate (Fuel)</p>
+                    <p class="text-xs text-gray-400 mb-2">Sacrifice carried crystal for immediate Stability.</p>
+                    <button id="immolate-btn" class="action-button w-full py-2 bg-red-600 hover:bg-red-700 text-white text-xs disabled:shadow-none" disabled>
+                        IMMOLATE <span id="immolate-amount"></span>
+                    </button>
+                </div>
+                
+                <!-- Refine/Crafting Button -->
+                <button id="refine-toggle-btn" class="action-button w-full py-2 bg-blue-600 hover:bg-blue-700 text-white text-xs">
+                    OPEN REFINERY (CRAFT)
+                </button>
+                
+            </div>
+
+            <!-- Column 3: Refinery/Crafting Menu -->
+            <div id="refinery-menu" class="w-1/3 space-y-3 hidden">
+                <h3 class="text-lg font-bold text-blue-400">Refinery (Long-Term Progress)</h3>
+                <div id="crafting-list" class="space-y-2 text-xs">
+                    <!-- Crafting items dynamically inserted here -->
+                </div>
+                <button id="refine-close-btn" class="action-button w-full py-1 mt-2 bg-gray-600 hover:bg-gray-700 text-white text-xs">
+                    CLOSE
+                </button>
+            </div>
+
+            <!-- Start/Game Over Overlay -->
+            <div id="game-overlay" class="absolute top-0 left-0 w-full h-full bg-black bg-opacity-90 flex flex-col justify-center items-center text-center p-8 z-10">
+                <h1 id="overlay-title" class="text-5xl font-extrabold text-yellow-500 mb-4" style="font-family: 'Press Start 2P', cursive;">THE LAST LIGHT</h1>
+                <p id="overlay-message" class="text-lg text-gray-300 mb-6 font-mono">
+                    You are the Guardian of the Light. The darkness consumes all.
+                </p>
+                <div class="mb-6 space-y-2 text-left font-mono text-sm text-gray-400">
+                    <p>Controls: <span class="text-yellow-400">W</span> (Up), <span class="text-yellow-400">S</span> (Down), <span class="text-yellow-400">A</span> (Left), <span class="text-yellow-400">D</span> (Right)</p>
+                    <p>Objective: Keep **Light Stability** above 0%.</p>
+                    <p>Sacrifice: Immolate crystal for stability or Refine for tools.</p>
+                </div>
+                <button id="start-game-btn" class="action-button px-6 py-3 bg-yellow-600 hover:bg-yellow-700 text-white text-base">
+                    START THE JOURNEY
+                </button>
+            </div>
+            
+            <!-- Floating Message Box (New for user feedback) -->
+            <div id="message-box" class="absolute top-4 left-1/2 transform -translate-x-1/2 p-3 bg-red-800 text-white text-center rounded-lg shadow-xl z-20 hidden transition-all duration-300 opacity-0">
+                <!-- Message content goes here -->
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const canvas = document.getElementById('game-canvas');
+            const ctx = canvas.getContext('2d');
+            const CANVAS_WIDTH = 900;
+            const CANVAS_HEIGHT = 450;
+            canvas.width = CANVAS_WIDTH;
+            canvas.height = CANVAS_HEIGHT;
+            
+            // --- UI Elements ---
+            const stabilityBar = document.getElementById('stability-bar');
+            const stabilityValue = document.getElementById('stability-value');
+            const carriedCrystal = document.getElementById('carried-crystal');
+            const inventoryT1 = document.getElementById('inventory-t1');
+            const inventoryT2 = document.getElementById('inventory-t2');
+            const equipmentList = document.getElementById('equipment-list');
+            const actionPanel = document.getElementById('action-panel');
+            const immolateBtn = document.getElementById('immolate-btn');
+            const immolateAmountSpan = document.getElementById('immolate-amount');
+            const refineToggleBtn = document.getElementById('refine-toggle-btn');
+            const refineryMenu = document.getElementById('refinery-menu');
+            const craftingList = document.getElementById('crafting-list');
+            const refineCloseBtn = document.getElementById('refine-close-btn');
+            const gameOverlay = document.getElementById('game-overlay');
+            const overlayTitle = document.getElementById('overlay-title');
+            const overlayMessage = document.getElementById('overlay-message');
+            const startGameBtn = document.getElementById('start-game-btn');
+            const messageBox = document.getElementById('message-box'); // NEW
+
+            // --- Game Constants ---
+            const MAX_STABILITY = 100;
+            const STABILITY_DRAIN_RATE = 0.04; // Drain per frame
+            const PLAYER_SPEED = 2.5;
+            const LIGHT_SOURCE_X = CANVAS_WIDTH / 2;
+            const LIGHT_SOURCE_Y = CANVAS_HEIGHT / 2;
+            const LIGHT_RADIUS_BASE = 150;
+            const ACTION_RANGE = 50; // Distance from center to interact
+            const TILE_SIZE = 30; // For player and crystal size
+
+            // --- Resource Definitions ---
+            const RESOURCES = {
+                T1: { color: '#00cc66', value: 30, name: 'T1 Fringing Crystal' }, // Green
+                T2: { color: '#6699ff', value: 70, name: 'T2 Deep Core' }       // Blue
+            };
+
+            // --- Crafting Recipes ---
+            const CRAFTING_RECIPES = [
+                {
+                    id: 'pickaxe',
+                    name: 'Mining Pickaxe',
+                    cost: [{ type: 'T1', amount: 3 }],
+                    benefit: 'Unlocks T2 (Deep Core) collection.',
+                    owned: false
+                },
+                {
+                    id: 'lantern',
+                    name: 'Warden\'s Lantern',
+                    cost: [{ type: 'T1', amount: 2 }, { type: 'T2', amount: 1 }],
+                    benefit: '+50 Light Radius and -20% Drain Rate.',
+                    owned: false
+                }
+            ];
+
+            // --- Game State ---
+            let gameState = {
+                isPaused: true,
+                isGameOver: false,
+                lightStability: MAX_STABILITY,
+                player: {
+                    x: LIGHT_SOURCE_X,
+                    y: LIGHT_SOURCE_Y,
+                    hasCrystal: null, // Stores 'T1' or 'T2'
+                    speed: PLAYER_SPEED
+                },
+                inventory: {
+                    T1: 0,
+                    T2: 0
+                },
+                // Added W (Up) and S (Down) keys for 2D movement
+                keys: { w: false, s: false, a: false, d: false }, 
+                mapItems: [], // Resources on the map
+                currentRadius: LIGHT_RADIUS_BASE,
+                currentDrain: STABILITY_DRAIN_RATE,
+                isRefineryOpen: false 
+            };
+            
+            // --- Utility Functions (NEW) ---
+            let messageTimeout;
+            function showMessage(text, duration = 3000) {
+                clearTimeout(messageTimeout);
+                messageBox.textContent = text;
+                messageBox.classList.remove('hidden', 'opacity-0');
+                messageBox.classList.add('opacity-100');
+
+                messageTimeout = setTimeout(() => {
+                    messageBox.classList.remove('opacity-100');
+                    messageBox.classList.add('opacity-0');
+                    // Hide completely after fade out (duration of transition is 300ms)
+                    setTimeout(() => messageBox.classList.add('hidden'), 300); 
+                }, duration);
+            }
+
+            // --- Initialization ---
+
+            function generateMapItems() {
+                gameState.mapItems = [];
+                // Generate T1 crystals in the Fringes (150-350 units from center)
+                for (let i = 0; i < 5; i++) {
+                    const angle = Math.random() * Math.PI * 2;
+                    const distance = Math.random() * 200 + 150; // 150 to 350
+                    gameState.mapItems.push({
+                        x: LIGHT_SOURCE_X + Math.cos(angle) * distance,
+                        y: LIGHT_SOURCE_Y + Math.sin(angle) * distance,
+                        type: 'T1',
+                        active: true
+                    });
+                }
+                 // Generate T2 crystals in the Deep (350-450 units from center)
+                for (let i = 0; i < 3; i++) {
+                    const angle = Math.random() * Math.PI * 2;
+                    const distance = Math.random() * 100 + 350; // 350 to 450
+                    gameState.mapItems.push({
+                        x: LIGHT_SOURCE_X + Math.cos(angle) * distance,
+                        y: LIGHT_SOURCE_Y + Math.sin(angle) * distance,
+                        type: 'T2',
+                        active: true
+                    });
+                }
+            }
+            
+            function startGame() {
+                gameState.isPaused = false;
+                gameState.isGameOver = false;
+                gameState.lightStability = MAX_STABILITY;
+                gameState.player.x = LIGHT_SOURCE_X;
+                gameState.player.y = LIGHT_SOURCE_Y;
+                gameState.player.hasCrystal = null;
+                gameState.inventory.T1 = 0;
+                gameState.inventory.T2 = 0;
+                gameState.currentRadius = LIGHT_RADIUS_BASE;
+                gameState.currentDrain = STABILITY_DRAIN_RATE;
+                gameState.isRefineryOpen = false; 
+
+                CRAFTING_RECIPES.forEach(r => r.owned = false);
+
+                generateMapItems();
+                gameOverlay.classList.add('hidden');
+                updateUI();
+                gameLoop();
+            }
+
+            // --- UI Update & Crafting ---
+
+            function updateUI() {
+                const stabPercent = Math.max(0, gameState.lightStability);
+                
+                stabilityBar.style.width = `${stabPercent}%`;
+                stabilityValue.textContent = `${Math.floor(stabPercent)}%`;
+                
+                // Change color based on stability
+                if (stabPercent > 50) {
+                    stabilityBar.classList.remove('bg-yellow-500', 'bg-red-600');
+                    stabilityBar.classList.add('bg-green-500');
+                } else if (stabPercent > 20) {
+                    stabilityBar.classList.remove('bg-green-500', 'bg-red-600');
+                    stabilityBar.classList.add('bg-yellow-500');
+                } else {
+                    stabilityBar.classList.remove('bg-green-500', 'bg-yellow-500');
+                    stabilityBar.classList.add('bg-red-600');
+                }
+
+
+                // Update Carried Crystal
+                if (gameState.player.hasCrystal) {
+                    const type = gameState.player.hasCrystal;
+                    carriedCrystal.textContent = RESOURCES[type].name;
+                    carriedCrystal.style.color = RESOURCES[type].color;
+                    immolateBtn.disabled = false;
+                    immolateAmountSpan.textContent = `(+${RESOURCES[type].value}%)`;
+                } else {
+                    carriedCrystal.textContent = 'None';
+                    carriedCrystal.style.color = '#f87171'; // Tailwind red-400
+                    immolateBtn.disabled = true;
+                    immolateAmountSpan.textContent = '';
+                }
+
+                // Update Inventory
+                inventoryT1.textContent = gameState.inventory.T1;
+                inventoryT2.textContent = gameState.inventory.T2;
+                
+                // --- Panel visibility logic based on isRefineryOpen state ---
+                const distToCenter = Math.hypot(gameState.player.x - LIGHT_SOURCE_X, gameState.player.y - LIGHT_SOURCE_Y);
+                
+                if (distToCenter < ACTION_RANGE) {
+                    // Near center: Show the appropriate panel based on the state flag
+                    if (gameState.isRefineryOpen) {
+                        actionPanel.classList.add('hidden');
+                        refineryMenu.classList.remove('hidden');
+                    } else {
+                        actionPanel.classList.remove('hidden');
+                        refineryMenu.classList.add('hidden');
+                    }
+                } else {
+                    // Away from center: Hide both panels and reset refinery state
+                    actionPanel.classList.add('hidden');
+                    refineryMenu.classList.add('hidden');
+                    gameState.isRefineryOpen = false;
+                }
+                // --- END Panel visibility fix ---
+
+
+                renderEquipment();
+                renderCraftingList();
+            }
+
+            function renderEquipment() {
+                equipmentList.innerHTML = '';
+                CRAFTING_RECIPES.forEach(recipe => {
+                    if (recipe.owned) {
+                        const li = document.createElement('li');
+                        li.className = 'text-green-300 ml-2 list-disc';
+                        li.textContent = recipe.name;
+                        equipmentList.appendChild(li);
+                    }
+                });
+                if (equipmentList.children.length === 0) {
+                    const li = document.createElement('li');
+                    li.className = 'text-gray-500 ml-2 italic';
+                    li.textContent = 'None crafted.';
+                    equipmentList.appendChild(li);
+                }
+            }
+
+            function renderCraftingList() {
+                craftingList.innerHTML = '';
+                CRAFTING_RECIPES.forEach(recipe => {
+                    if (recipe.owned) return; // Skip owned recipes
+
+                    const canAfford = recipe.cost.every(c => gameState.inventory[c.type] >= c.amount);
+                    
+                    const div = document.createElement('div');
+                    div.className = `crafting-item p-3 border border-gray-700 flex justify-between items-center ${canAfford ? '' : 'opacity-50 disabled'}`;
+                    
+                    let costHtml = recipe.cost.map(c => 
+                        `<span class="${gameState.inventory[c.type] >= c.amount ? 'text-green-400' : 'text-red-400'}">${c.amount} ${c.type}</span>`
+                    ).join(', ');
+
+                    div.innerHTML = `
+                        <div>
+                            <p class="font-bold">${recipe.name}</p>
+                            <p class="text-xs text-gray-400">Cost: ${costHtml}</p>
+                            <p class="text-xs text-yellow-300">Effect: ${recipe.benefit}</p>
+                        </div>
+                        <button class="craft-btn action-button px-3 py-1 bg-green-600 hover:bg-green-700 text-white text-xs disabled:shadow-none" data-id="${recipe.id}" ${!canAfford ? 'disabled' : ''}>
+                            REFINE
+                        </button>
+                    `;
+                    
+                    craftingList.appendChild(div);
+                });
+            }
+
+            function craftItem(recipeId) {
+                const recipe = CRAFTING_RECIPES.find(r => r.id === recipeId);
+                if (!recipe || recipe.owned) return;
+
+                const canAfford = recipe.cost.every(c => gameState.inventory[c.type] >= c.amount);
+
+                if (canAfford) {
+                    // Sacrifice resources from inventory
+                    recipe.cost.forEach(c => {
+                        gameState.inventory[c.type] -= c.amount;
+                    });
+                    
+                    recipe.owned = true;
+                    
+                    // Apply permanent benefits
+                    if (recipe.id === 'lantern') {
+                        gameState.currentRadius += 50; // Increased Light Radius
+                        gameState.currentDrain *= 0.8; // 20% reduced drain rate
+                    }
+                    
+                    updateUI();
+                }
+            }
+
+            // --- Game Drawing Functions ---
+            
+            function drawLightAura() {
+                const radius = gameState.currentRadius;
+                const gradient = ctx.createRadialGradient(
+                    LIGHT_SOURCE_X, LIGHT_SOURCE_Y, 0,
+                    LIGHT_SOURCE_X, LIGHT_SOURCE_Y, radius
+                );
+                
+                // Color based on stability
+                let outerColor = 'rgba(255, 165, 0, 0)'; // Default orange/yellow
+                if (gameState.lightStability < 20) {
+                    outerColor = 'rgba(255, 0, 0, 0)'; // Red
+                }
+
+                gradient.addColorStop(0, 'rgba(255, 255, 200, 0.9)'); // Bright center
+                gradient.addColorStop(0.5, 'rgba(255, 193, 7, 0.3)'); // Mid-Aura
+                gradient.addColorStop(1, outerColor); // Fades to black
+
+                ctx.fillStyle = gradient;
+                ctx.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+            }
+
+            function drawLightSource() {
+                ctx.fillStyle = '#FFC107'; // Core Light
+                ctx.beginPath();
+                ctx.arc(LIGHT_SOURCE_X, LIGHT_SOURCE_Y, 15, 0, Math.PI * 2);
+                ctx.fill();
+            }
+
+            function drawPlayer() {
+                // Determine player color/shape based on what they carry
+                const crystalType = gameState.player.hasCrystal;
+                const playerColor = crystalType ? RESOURCES[crystalType].color : '#F5E68C'; // Base yellow color
+
+                ctx.fillStyle = playerColor;
+                ctx.strokeStyle = '#000000';
+                ctx.lineWidth = 2;
+                
+                // Draw a simple square Guardian
+                const playerSize = TILE_SIZE;
+                const px = gameState.player.x - playerSize / 2;
+                const py = gameState.player.y - playerSize / 2;
+                
+                ctx.fillRect(px, py, playerSize, playerSize);
+                ctx.strokeRect(px, py, playerSize, playerSize);
+
+                // Draw a small icon to show carried item
+                if (crystalType) {
+                    ctx.fillStyle = '#000000';
+                    ctx.beginPath();
+                    ctx.arc(gameState.player.x, gameState.player.y, 4, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+            }
+
+            function drawMapItems() {
+                gameState.mapItems.forEach(item => {
+                    if (item.active) {
+                        const resource = RESOURCES[item.type];
+                        
+                        // Draw outer glow/shadow
+                        ctx.fillStyle = resource.color;
+                        ctx.globalAlpha = 0.5;
+                        ctx.beginPath();
+                        ctx.arc(item.x, item.y, TILE_SIZE / 2, 0, Math.PI * 2);
+                        ctx.fill();
+                        ctx.globalAlpha = 1;
+                        
+                        // Draw crystal core
+                        ctx.fillStyle = '#FFFFFF';
+                        ctx.beginPath();
+                        ctx.arc(item.x, item.y, TILE_SIZE / 4, 0, Math.PI * 2);
+                        ctx.fill();
+                    }
+                });
+            }
+
+            function draw() {
+                // Draw background (always black/dark)
+                ctx.fillStyle = '#000000';
+                ctx.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+
+                drawLightAura();
+                drawLightSource();
+                drawMapItems();
+                drawPlayer();
+            }
+
+            // --- Game Logic ---
+
+            function updateLightStability() {
+                if (gameState.isPaused || gameState.isGameOver) return;
+                
+                gameState.lightStability -= gameState.currentDrain;
+                
+                if (gameState.lightStability <= 0) {
+                    gameState.lightStability = 0;
+                    endGame();
+                }
+            }
+            
+            function handleMovement() {
+                if (gameState.isPaused) return;
+
+                let dx = 0;
+                let dy = 0;
+
+                // Horizontal movement (A and D)
+                if (gameState.keys.a) {
+                    dx = -gameState.player.speed;
+                }
+                if (gameState.keys.d) {
+                    dx = gameState.player.speed;
+                }
+                
+                // Vertical movement (W and S)
+                if (gameState.keys.w) {
+                    dy = -gameState.player.speed; // Y decreases to move up
+                }
+                if (gameState.keys.s) {
+                    dy = gameState.player.speed; // Y increases to move down
+                }
+
+                // Update position
+                gameState.player.x += dx;
+                gameState.player.y += dy;
+                
+                // Clamp position to canvas bounds
+                gameState.player.x = Math.max(TILE_SIZE / 2, Math.min(CANVAS_WIDTH - TILE_SIZE / 2, gameState.player.x));
+                gameState.player.y = Math.max(TILE_SIZE / 2, Math.min(CANVAS_HEIGHT - TILE_SIZE / 2, gameState.player.y));
+            }
+
+            function checkInteractions() {
+                // 1. Check for Crystal Pickup
+                if (!gameState.player.hasCrystal && !gameState.isPaused) {
+                    gameState.mapItems.forEach(item => {
+                        if (item.active) {
+                            const dist = Math.hypot(gameState.player.x - item.x, gameState.player.y - item.y);
+                            if (dist < TILE_SIZE) {
+                                // Check if player can collect this resource type
+                                if (item.type === 'T2' && !CRAFTING_RECIPES.find(r => r.id === 'pickaxe').owned) {
+                                    // FIX: Provide clear feedback to user instead of console.log
+                                    showMessage("Mining Pickaxe required to collect T2 Deep Core!"); 
+                                    return; 
+                                }
+                                
+                                gameState.player.hasCrystal = item.type;
+                                item.active = false; // Crystal removed from map
+                            }
+                        }
+                    });
+                }
+                
+                // 2. Check for Light Source interaction range
+                const distToCenter = Math.hypot(gameState.player.x - LIGHT_SOURCE_X, gameState.player.y - LIGHT_SOURCE_Y);
+                // Note: UI panel visibility logic is handled in updateUI.
+            }
+            
+            function endGame() {
+                gameState.isGameOver = true;
+                gameState.isPaused = true;
+                overlayTitle.textContent = "THE DARKNESS WINS";
+                overlayTitle.classList.remove('text-yellow-500');
+                overlayTitle.classList.add('text-red-600');
+                overlayMessage.innerHTML = `Your efforts failed. Final Stored Resources: 
+                    <span class="text-green-400">${gameState.inventory.T1} T1</span>, 
+                    <span class="text-blue-400">${gameState.inventory.T2} T2</span>.`;
+                startGameBtn.textContent = "TRY AGAIN";
+                gameOverlay.classList.remove('hidden');
+            }
+
+            function gameLoop() {
+                if (gameState.isPaused) return;
+
+                handleMovement();
+                updateLightStability();
+                checkInteractions();
+                updateUI();
+                draw();
+
+                requestAnimationFrame(gameLoop);
+            }
+
+            // --- Event Listeners ---
+
+            // Player Actions
+            immolateBtn.addEventListener('click', () => {
+                if (!gameState.player.hasCrystal || gameState.isPaused) return;
+                
+                const type = gameState.player.hasCrystal;
+                const value = RESOURCES[type].value;
+                
+                gameState.lightStability = Math.min(MAX_STABILITY, gameState.lightStability + value);
+                gameState.player.hasCrystal = null; // Sacrifice complete
+                
+                // Re-generate resources occasionally, to ensure continued play
+                if (Math.random() < 0.2) {
+                     generateMapItems();
+                }
+                
+                updateUI();
+            });
+
+            // Inventory/Refining Actions
+            refineToggleBtn.addEventListener('click', () => {
+                gameState.isRefineryOpen = true;
+                updateUI();
+            });
+            refineCloseBtn.addEventListener('click', () => {
+                gameState.isRefineryOpen = false;
+                updateUI();
+            });
+            
+            // Delegate crafting clicks
+            craftingList.addEventListener('click', (e) => {
+                const button = e.target.closest('.craft-btn');
+                if (button && !button.disabled) {
+                    craftItem(button.dataset.id);
+                }
+            });
+
+            // Game Start
+            startGameBtn.addEventListener('click', startGame);
+
+            // Movement Inputs (W, S, A, D keys)
+            document.addEventListener('keydown', (e) => {
+                if (gameState.isPaused) return;
+                if (e.key === 'w' || e.key === 'W') gameState.keys.w = true; // Up
+                if (e.key === 's' || e.key === 'S') gameState.keys.s = true; // Down
+                if (e.key === 'a' || e.key === 'A') gameState.keys.a = true; // Left
+                if (e.key === 'd' || e.key === 'D') gameState.keys.d = true; // Right
+                // Add key to drop crystal to inventory
+                if ((e.key === 'e' || e.key === 'E') && gameState.player.hasCrystal) {
+                    const type = gameState.player.hasCrystal;
+                    gameState.inventory[type]++;
+                    gameState.player.hasCrystal = null;
+                    updateUI();
+                }
+            });
+
+            document.addEventListener('keyup', (e) => {
+                if (e.key === 'w' || e.key === 'W') gameState.keys.w = false;
+                if (e.key === 's' || e.key === 'S') gameState.keys.s = false;
+                if (e.key === 'a' || e.key === 'A') gameState.keys.a = false;
+                if (e.key === 'd' || e.key === 'D') gameState.keys.d = false;
+            });
+
+            // Initial Draw
+            draw(); 
+        });
+    </script>
+</body>
+</html>

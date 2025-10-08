@@ -1,0 +1,450 @@
+html {
+    scroll-behavior: smooth;
+}
+body{
+    font-family: Roboto,Arial;
+    padding: 0;
+    color: #2B2D42;
+    background-color: #f7e6ca;
+    font-size: 20px;
+    line-height: 1.6rem;
+    animation: fadeInPage 1s ease-in both;
+}
+.upper{
+    background-image: linear-gradient(rgba(4,9,30,0.7)),url("Profile-images/bg.jpg");
+    border-radius: 20px;
+    background-size: cover;
+    background-position: center;
+    position: relative;
+    width: 100%;
+    min-height: 100vh;
+}
+.Header-bar{
+    display: flex;
+    margin-top: 0;
+    animation: fadeInUp 0.8s ease-out both;
+    align-items: center;
+    border-radius: 5px;
+}
+.Header-bar div p{
+    font-size: 28px;
+    margin-left: 20px;
+    color: white;
+}
+.left-section{
+    display: flex;
+    margin-right: 80px;
+    padding-right: 340px;
+    color: black;
+}
+.nav-image{
+    margin:23px 7px;
+    width: 60px;
+    height: 45px;
+    border-radius:27px;
+}
+.middle-section{
+    margin: 0 20px;
+    flex-shrink: 1;
+}
+a{
+    margin-right: 20px;
+    text-decoration: none;
+    font-size: medium;
+    color: white;
+    font-size: 20px;
+    transition: color 0.3s ease;
+}
+nav a:hover{
+    color: #007BFF;
+    text-decoration: underline;
+    transform: scale(1.05);
+}
+.right-section{
+    margin-left: 270px;
+    
+}
+button{
+    width: 140px;
+    height: 35px;
+    border-radius: 18px;
+    background-color: #d9bbb0;
+    border-style: none;
+    cursor: pointer;
+    
+}
+button:focus, a:focus {
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.5);
+}
+button:hover {
+    background-color: #caa499;
+    transform: scale(1.05);
+    box-shadow: 0px 4px 10px rgba(0,0,0,0.2);
+}
+.hero-section{
+    max-height: auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: 20px;
+    margin-bottom: 250px;
+    margin-top: 157px;
+    padding: 50px;
+    animation: fadeInUp 1s ease-out both;
+}
+.left-section1{
+    max-width: 500px;
+    margin-right: 170px;
+    margin-top: 70px;
+}
+.greet{
+    font-size: 14px;
+    line-height: 0px;
+    margin-left: 5px;
+    color: white;
+}
+.name{
+    font-size: 45px;
+    line-height: 0px;
+    color: darkseagreen;
+}
+.job{
+    font-size: 29px;
+    line-height: 3px;
+    color:darkgray;
+}
+.greet:hover, .name:hover, .job:hover {
+    color: #0056b3;
+    transform: scale(1.02);
+}
+.description{
+    font-size: 12px;
+    color: white;
+}
+.view-work{
+    margin-top: 20px;
+}
+.middle-section1{
+    max-width: 700px;
+    margin-right: 100px;
+}
+.hero-section img{
+    width: 400px;
+    height: 400px;
+    margin-top: 80px;
+    border-radius: 20px;
+    margin-left:180px;
+}
+.hero-section img:hover {
+    transform: scale(1.05);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+}
+.About-me{
+    margin-bottom: 400px;
+    padding: 30px;
+    max-height: 500px;
+    animation: fadeInUp 1.3s ease-out both;
+}
+.opts{
+    margin: 50px 60px;
+    max-width: 1200px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+.opts:hover {
+    transform: scale(1.01);
+    background-color: rgba(255, 255, 255, 0.05);
+}
+.About-me h2{
+    font-size: 38px;
+    text-align: center;
+    margin-right: 100px;
+    margin-bottom: 80px;
+    font-weight: bold;
+}
+.opt1 h3,
+.opt2 h3,
+.skills h3{
+    font-size: 23px;
+}
+.opt1 .opt2{
+    max-width: 1200px;
+    margin-left: 100px;
+    width: 650px;
+    height: 300px;
+    margin: 10px;
+    text-align: center;
+    border-radius: 10px;
+    display: flex;
+    margin-bottom: 70px;
+}
+.Project0{
+    font-size: 26px;
+    text-align: center;
+    align-items: center;
+    padding-bottom: 120px;
+    margin-bottom: 30px;
+    padding-top: 55px;
+    grid-area: Project;
+    background-image: linear-gradient(rgba(171, 175, 196, 0.7)),url("Profile-images/proj.avif");
+    border-radius: 20px;
+    background-size: cover;
+    background-position: center;
+    position: relative;
+    width: 100%;
+    min-height: 70vh;
+}
+
+.projecct{
+    display: grid;
+    grid-template-columns:repeat(3,1fr);
+    grid-template-rows: repeat(2,1fr);
+    column-gap: 10px;
+    row-gap: 10px;
+    text-align: center;
+    align-items: center;
+    margin-left: 130px;
+    animation: fadeInUp 1.6s ease-out both;
+}
+.project1,.project2,.project3,.project4,.project5,.project6{
+    /* background-color: #eda45f; */
+    border: 1px solid #000;
+    border-radius: 30px;
+    max-width: 300px;
+    max-height: 340px;
+}
+.project1:hover, .project2:hover, .project3:hover,
+.project4:hover, .project5:hover, .project6:hover {
+    background-color: #f3b97e;
+    transform: scale(1.03);
+    box-shadow: 0px 4px 20px rgba(0, 0, 0, 0.3);
+    cursor: pointer;
+}
+.projecct img{
+    max-width: 300px;
+    max-height: 130px;
+    align-items: center;
+    margin: 10px 35px;
+}
+.projecct img:hover {
+    transform: scale(1.05);
+    box-shadow: 0px 4px 15px rgba(0,0,0,0.2);
+}
+.Contacts{
+    padding: 60px;
+    text-align: center;
+    animation: fadeInUp 1.9s ease-out both;
+}
+.contact0 .buttons1{
+    display: flex;
+    justify-content: center;
+}
+.contact0 button{
+    margin: 50px auto;
+}
+.contact0 .Linkdien{
+    background-color: rgba(35, 78, 172, 0.623);
+    color: white;
+}
+.Linkdien:hover {
+    background-color: rgba(35, 78, 172, 0.8);
+    transform: scale(1.1);
+}
+.Github{
+    background-color: rgba(0, 0, 0, 0.782);
+    color: white;
+}
+.Github:hover {
+    background-color: rgba(0, 0, 0, 0.9);
+    transform: scale(1.1);
+}
+.Instagram{
+    background-color: rgba(224, 43, 224, 0.784);
+    color: white;
+}
+.Instagram:hover {
+    background-color: rgba(224, 43, 224, 0.9);
+    transform: scale(1.1);
+}
+.footer{
+    background-color: rgba(211, 211, 211, 0.828);
+    animation: fadeInUp 2.2s ease-out both;
+}
+.footer p{
+    margin: 20px ;
+    text-align: center;
+}
+.hero-section,
+.About-me,
+.projecct,
+.Contacts,
+.footer,
+.Header-bar {
+  animation: fadeInUp 1s ease-out both;
+}
+
+@keyframes fadeInPage {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+
+
+@media (max-width: 1400px) and (min-width:767px) {
+    Header{
+        flex-direction: column;
+        align-items: center; 
+    }
+    .Header-bar{
+        display: flex;
+        flex-direction: column;
+        text-align: center;
+    }
+    .Header-bar .left-section{
+        padding: 10px;
+        margin: auto;
+    }
+     .Header-bar .middle-section{
+        display: flex;
+        margin-left: 130px;
+    }
+    .Header-bar a{
+        margin-left: 30px;
+    }
+    .hero-section{
+        flex-direction: column;
+        padding: 40px 20px; 
+        margin-bottom: 400px;
+    }
+    .hero-section .left-section1{
+        order: 0;
+        text-align: center;
+        margin: 220px 0px 50px 50px;
+    }
+    .hero-section img{
+        order: 1;
+        margin-top: 20px;
+    }
+    .Project0{
+        margin-top: 800px;
+        margin-bottom: 10px;
+    }
+    .Project0 h2{
+        margin-right:60px ;
+    }
+    .projecct{
+        grid-template-columns: repeat(2, 1fr);
+        gap: 15px;
+    }
+    h1{
+        font-size: 2.5rem; 
+    }
+}
+
+
+
+@media (max-width: 767px) {
+    body{
+        display: flex;
+        flex-direction: column;
+    }
+    Header{
+        flex-direction: column;
+        align-items: center; 
+    }
+    .Header-bar{
+        margin-top: 10px;
+        display: flex;
+        flex-direction: column;
+        text-align: center; 
+    }
+    .Header-bar .left-section{
+        margin-right: 10px;
+        padding: 10px;
+    }
+    .Header-bar .middle-section{
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+    }
+    .Header-bar a{
+        padding: 5px 10px;
+        font-size: 0.9rem;
+    }
+    .hero-section {
+        flex-direction: column;
+        padding: 20px;
+    }
+    .hero-section img{
+        margin-left: 50px;
+        width: 100%;
+        height: auto;
+        order: 1; 
+        margin-top: 30px;
+    }
+    .greet,.description{
+        font-size: 10px;
+    }
+    .name,.job{
+        font-size: 18px;
+    }
+    .About-me h2{
+        margin-left: 60px;
+        margin-bottom: 30px;
+        font-size: 1.8rem;
+    }
+    .About-me{
+        margin-top: 110px;
+        padding: 30px;
+        margin-bottom: 480px;
+        font-size: 10px;
+    }
+    .opt1 h3,
+    .opt2 h3,
+    .skills h3{
+    font-size: 18px;
+    }
+    .hero-section .left-section1{
+        order: 0;
+        text-align: center;
+        margin: 220px 20px 90px;
+    }
+    .Project0{
+        margin-top: 400px;
+    }
+    .projecct{  
+        grid-template-columns: 1fr; 
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        margin-left: 20px;
+        max-height: 1400px;
+    }
+    .contact{
+        margin-top: 30px;
+        width: 100%;
+        margin-bottom: 10px;
+    }
+    .buttons1 {
+    flex-direction: column;
+    align-items: center;
+  }
+}
+

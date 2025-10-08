@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Grids</title>
+    <style>
+        *{
+            background-color: pink;
+        }
+        .container{
+            background-color: green;
+             background-color: green;
+        height: 1000px;
+        width: 1200px;
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr; 
+        grid-template-rows: 1fr 1fr 1fr ;
+        margin: auto;  
+        column-gap: 10px;
+        row-gap: 10px; 
+        }
+
+        .box{
+           background-color: red;
+          
+        }
+
+        .box1{
+            background-color: black;
+            grid-column: 1/7;
+            /* grid-row: 1/3; */
+        }
+
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="box box1">1</div>
+        <div class="box box2">2</div>
+        <div class="box box3">3</div>
+        <div class="box box4">4</div>
+        <div class="box box5">5</div>
+        <div class="box box6">6</div>
+        <div class="box box7">7</div>
+        <div class="box box8">8</div>
+        <div class="box box9">9</div>
+    </div>
+</body>
+</html>
